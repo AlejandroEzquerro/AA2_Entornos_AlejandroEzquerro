@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pura Aventura - Panel de Gestión</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="../../Imagenes/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../Imagenes/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../Imagenes/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../../Imagenes/favicon_io/site.webmanifest">
+    <script src="index.js" defer></script>
+</head>
+<body>
+
+    <header class="cabecera">
+        <img src="../../Imagenes/Logo_empresa.png" alt="Logo" class="logo-imagen">
+        <div class="marca">
+            <h1>Pura Aventura</h1>
+        </div>
+    </header>
+
+    <main class="contenedor">
+        <div class="columna-gestion">
+            <section class="tarjeta-formulario">
+                <h2>Registrar Actividad</h2>
+                <form id="formulario-actividad" class="formulario">
+                    <div class="campo">
+                        <label for="actividad-titulo">Actividad:</label>
+                        <input type="text" id="actividad-titulo" placeholder="Ej: Rafting extremo" required>
+                    </div>
+                    <div class="campo">
+                        <label for="actividad-descripcion">Descripción:</label>
+                        <textarea id="actividad-descripcion" placeholder="Describe la actividad..."></textarea>
+                    </div>
+                    <button type="submit" class="boton-primario">Añadir Actividad</button>
+                </form>
+            </section>
+
+            <section class="contenedor-listado">
+                <h3>Lista de Actividades</h3>
+                <div id="actividades-disponibles"></div>
+            </section>
+        </div>
+        <div class="columna-gestion">
+            <section class="tarjeta-formulario">
+                <h2>Registrar Reserva</h2>
+                <form id="formulario-reserva" class="formulario">
+                    <div class="campo">
+                        <label for="reserva-nombre">Nombre y Apellido:</label>
+                        <input type="text" id="reserva-nombre" required>
+                    </div>
+                    <div class="campo">
+                        <label for="reserva-correo">Email:</label>
+                        <input type="email" id="reserva-correo" required>
+                    </div>
+                    <div class="campo">
+                        <label for="reserva-actividad">Actividad:</label>
+                        <select id="reserva-actividad" required>
+                            <option value="">-- Selecciona una actividad --</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="reserva-mensaje">Mensaje:</label>
+                        <textarea id="reserva-mensaje"></textarea>
+                    </div>
+                    <button type="submit" class="boton-primario">Registrar Reserva</button>
+                </form>
+            </section>
+
+            <section class="contenedor-listado">
+                <h3>Lista de Reservas</h3>
+                <div class="filtro-reservas">
+                    <label for="buscador-actividad">Filtrar por actividad:</label>
+                    <input type="text" id="buscador-actividad" placeholder="Escribe para buscar...">
+                </div>
+                <div id="contenedor-listado-reservas"></div>
+            </section>
+        </div>
+
+    </main>
+</body>
+</html>

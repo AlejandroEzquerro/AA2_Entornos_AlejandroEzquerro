@@ -1,0 +1,12 @@
+{
+  "name": "pura_aventura",
+  "version": "0.1",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1",
+    "cors": "^2.8.5",
+    "sqlite3": "^5.1.7"
+  }
+}
