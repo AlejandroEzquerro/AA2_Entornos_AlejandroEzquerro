@@ -1,3 +1,7 @@
+if (sessionStorage.getItem('sesion_activa') !== 'true') {
+    window.location.href = 'contraseña.html';
+}
+
 const URL_API = 'http://localhost:8080';
 
 function crearEstructuraTarjeta(titulo, arrayDatos, callbackEditar, callbackBorrar) {
