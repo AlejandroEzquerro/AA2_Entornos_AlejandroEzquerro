@@ -1,10 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+
+const { body, validationResult } = require('express-validator');
 const baseDatos = require('./database');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+const validarCampos = (pedido, respuesta, siguiente) => {
+    const errores = validationResult(pedido);
+    if (!errores.isEmpty()) {
+        return respuesta.status(400).json({ errores: errores.array() });
+    }
+    siguiente();
+};
 
 app.get('/actividades', (pedido, respuesta) => {
     const consulta = "SELECT * FROM actividades";
@@ -16,17 +26,24 @@ app.get('/actividades', (pedido, respuesta) => {
     });
 });
 
-app.post('/actividades', (pedido, respuesta) => {
-    const { titulo, descripcion } = pedido.body;
-    const consulta = "INSERT INTO actividades (titulo, descripcion) VALUES (?, ?)";
+app.post('/actividades', 
+    [
+        body('titulo').trim().notEmpty().withMessage('El título de la actividad es obligatorio'),
+        body('descripcion').isLength({ min: 5 }).withMessage('La descripción debe tener al menos 5 letras'),
+        validarCampos 
+    ], 
+    (pedido, respuesta) => {
+        const { titulo, descripcion } = pedido.body;
+        const consulta = "INSERT INTO actividades (titulo, descripcion) VALUES (?, ?)";
 
-    baseDatos.run(consulta, [titulo, descripcion], function (error) {
-        if (error) {
-            return respuesta.status(500).json({ error: error.message });
-        }
-        respuesta.status(201).json({ id_generado: this.lastID });
-    });
-});
+        baseDatos.run(consulta, [titulo, descripcion], function (error) {
+            if (error) {
+                return respuesta.status(500).json({ error: error.message });
+            }
+            respuesta.status(201).json({ id_generado: this.lastID });
+        });
+    }
+);
 
 app.put('/actividades/:id', (pedido, respuesta) => {
     const { titulo, descripcion } = pedido.body;
@@ -78,20 +95,29 @@ app.get('/reservas', (pedido, respuesta) => {
     });
 });
 
-app.post('/reservas', (pedido, respuesta) => {
-    const { nombre_cliente, email, mensaje, actividad_id } = pedido.body;
-    const consulta = "INSERT INTO reservas (nombre_cliente, email, mensaje, actividad_id) VALUES (?, ?, ?, ?)";
+app.post('/reservas', 
+    [
+        body('nombre_cliente').trim().notEmpty().withMessage('El nombre del cliente es obligatorio'),
+        body('email').isEmail().withMessage('Debes introducir un correo electrónico válido (ej: usuario@gmail.com)'),
+        body('actividad_id').isInt().withMessage('Debes seleccionar una actividad válida de la lista'),
+        body('mensaje').trim().notEmpty().withMessage('El mensaje es obligatorio').isLength({ min: 5 }).withMessage('La descripción debe tener al menos 5 letras'),
+        validarCampos
+    ],
+    (pedido, respuesta) => {
+        const { nombre_cliente, email, mensaje, actividad_id } = pedido.body;
+        const consulta = "INSERT INTO reservas (nombre_cliente, email, mensaje, actividad_id) VALUES (?, ?, ?, ?)";
 
-    baseDatos.run(consulta, [nombre_cliente, email, mensaje, actividad_id], function (error) {
-        if (error) {
-            if (error.message.includes("FOREIGN KEY constraint failed")) {
-                return respuesta.status(400).json({ error: "La actividad seleccionada no existe." });
+        baseDatos.run(consulta, [nombre_cliente, email, mensaje, actividad_id], function (error) {
+            if (error) {
+                if (error.message.includes("FOREIGN KEY constraint failed")) {
+                    return respuesta.status(400).json({ error: "La actividad seleccionada no existe." });
+                }
+                return respuesta.status(500).json({ error: error.message });
             }
-            return respuesta.status(500).json({ error: error.message });
-        }
-        respuesta.status(201).json({ id_generado: this.lastID });
-    });
-});
+            respuesta.status(201).json({ id_generado: this.lastID });
+        });
+    }
+);
 
 app.put('/reservas/:id', (pedido, respuesta) => {
     const { nombre_cliente, email, mensaje, actividad_id } = pedido.body;
