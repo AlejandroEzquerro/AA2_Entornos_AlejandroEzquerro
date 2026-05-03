@@ -73,11 +73,24 @@ const gestionActividades = {
 
     async guardar(evento) {
         evento.preventDefault();
+
+        const titulo = document.getElementById('actividad-titulo').value.trim();
+        const descripcion = document.getElementById('actividad-descripcion').value.trim();
+
+        if (titulo.length < 3) {
+            alert("El título debe tener al menos 3 caracteres.");
+            return;
+        }
+        if (descripcion.length < 5) {
+            alert("La descripción debe tener al menos 5 caracteres.");
+            return;
+        }
+
         const idEdicion = this.formulario.dataset.idEdicion;
 
         const datosActividad = {
-            titulo: document.getElementById('actividad-titulo').value,
-            descripcion: document.getElementById('actividad-descripcion').value
+            titulo: titulo,
+            descripcion: descripcion
         };
 
         const configuracion = {
@@ -207,13 +220,37 @@ const gestionReservas = {
 
     async guardar(evento) {
         evento.preventDefault();
+        const nombre = document.getElementById('reserva-nombre').value.trim();
+        const email = document.getElementById('reserva-correo').value.trim();
+        const actividadId = document.getElementById('reserva-actividad').value;
+        const mensaje = document.getElementById('reserva-mensaje').value.trim();
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        //if (!nombre) {
+           // alert("El nombre es obligatorio.");
+           // return;
+       // }
+        //if (!emailRegex.test(email)) {
+            //alert("El formato del email no es válido.");
+            //return;
+        //}
+        if (!actividadId) {
+            alert("Selecciona una actividad.");
+            return;
+        }
+        if (mensaje.length < 5) {
+            alert("El mensaje debe tener al menos 5 caracteres.");
+            return;
+        }
+
         const idEdicion = this.formulario.dataset.idEdicion;
 
         const datosReserva = {
-            nombre_cliente: document.getElementById('reserva-nombre').value,
-            email: document.getElementById('reserva-correo').value,
-            actividad_id: parseInt(document.getElementById('reserva-actividad').value),
-            mensaje: document.getElementById('reserva-mensaje').value
+            nombre_cliente: nombre,
+            email: email,
+            actividad_id: parseInt(actividadId),
+            mensaje: mensaje
         };
 
         const configuracion = {
