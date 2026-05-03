@@ -45,7 +45,7 @@ const gestionActividades = {
         while (this.contenedor.firstChild) {
             this.contenedor.removeChild(this.contenedor.firstChild);
         }
-        
+
         while (this.selectReservas.firstChild) {
             this.selectReservas.removeChild(this.selectReservas.firstChild);
         }
@@ -74,7 +74,7 @@ const gestionActividades = {
     async guardar(evento) {
         evento.preventDefault();
         const idEdicion = this.formulario.dataset.idEdicion;
-        
+
         const datosActividad = {
             titulo: document.getElementById('actividad-titulo').value,
             descripcion: document.getElementById('actividad-descripcion').value
@@ -87,51 +87,69 @@ const gestionActividades = {
         };
 
         const urlFinal = idEdicion ? `${URL_API}/actividades/${idEdicion}` : `${URL_API}/actividades`;
-        
-        await fetch(urlFinal, configuracion);
-        
-        this.limpiarFormulario();
-        this.listar();
-        gestionReservas.listar(); 
+
+        try {
+            const respuesta = await fetch(urlFinal, configuracion);
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok) {
+                if (resultado.errores) {
+                    const mensajes = resultado.errores.map(e => `- ${e.msg}`).join('\n');
+                    alert("Error de validación:\n" + mensajes);
+                } else {
+                    alert("Error: " + (resultado.error || "No se pudo guardar"));
+                }
+                return;
+            }
+
+            alert("¡Actividad guardada con éxito!");
+            this.limpiarFormulario();
+            this.listar();
+            gestionReservas.listar();
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("No se pudo conectar con el servidor.");
+        }
     },
 
     prepararEdicion(actividad) {
         document.getElementById('actividad-titulo').value = actividad.titulo;
         document.getElementById('actividad-descripcion').value = actividad.descripcion;
-        
+
         this.formulario.dataset.idEdicion = actividad.id;
         this.formulario.querySelector('button').textContent = "GUARDAR CAMBIOS";
         this.formulario.scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
 
     async borrar(idActividad) {
-    try {
-        const respuesta = await fetch(`${URL_API}/reservas`);
-        
-        if (!respuesta.ok) throw new Error("Error al conectar con el servidor");
+        try {
+            const respuesta = await fetch(`${URL_API}/reservas`);
 
-        const reservas = await respuesta.json();
+            if (!respuesta.ok) throw new Error("Error al conectar con el servidor");
 
-        const tieneReservas = reservas.some(reserva => reserva.actividad_id == idActividad);
+            const reservas = await respuesta.json();
 
-        if (tieneReservas) {
-            alert("No se puede eliminar: Esta actividad tiene reservas asociadas.");
-            return;
-        }
+            const tieneReservas = reservas.some(reserva => reserva.actividad_id == idActividad);
 
-        if (confirm("¿Estás seguro de que deseas eliminar esta actividad?")) {
-            const resDelete = await fetch(`${URL_API}/actividades/${idActividad}`, { method: 'DELETE' });
-            
-            if (resDelete.ok) {
-                this.listar(); 
+            if (tieneReservas) {
+                alert("No se puede eliminar: Esta actividad tiene reservas asociadas.");
+                return;
             }
+
+            if (confirm("¿Estás seguro de que deseas eliminar esta actividad?")) {
+                const resDelete = await fetch(`${URL_API}/actividades/${idActividad}`, { method: 'DELETE' });
+
+                if (resDelete.ok) {
+                    this.listar();
+                }
+            }
+        } catch (error) {
+            console.error("Fallo en la validación de borrado:", error);
+            alert("No se pudo verificar la disponibilidad. Revisa la consola.");
+            this.listar();
         }
-    } catch (error) {
-        console.error("Fallo en la validación de borrado:", error);
-        alert("No se pudo verificar la disponibilidad. Revisa la consola.");
-        this.listar();
-    }
-},
+    },
 
     limpiarFormulario() {
         this.formulario.reset();
@@ -159,7 +177,7 @@ const gestionReservas = {
 
         const textoFiltro = this.buscador.value.toLowerCase();
         if (textoFiltro) {
-            reservas = reservas.filter(reserva => 
+            reservas = reservas.filter(reserva =>
                 (reserva.nombre_actividad || "").toLowerCase().includes(textoFiltro)
             );
         }
@@ -190,7 +208,7 @@ const gestionReservas = {
     async guardar(evento) {
         evento.preventDefault();
         const idEdicion = this.formulario.dataset.idEdicion;
-        
+
         const datosReserva = {
             nombre_cliente: document.getElementById('reserva-nombre').value,
             email: document.getElementById('reserva-correo').value,
@@ -206,10 +224,28 @@ const gestionReservas = {
 
         const urlFinal = idEdicion ? `${URL_API}/reservas/${idEdicion}` : `${URL_API}/reservas`;
 
-        await fetch(urlFinal, configuracion);
-        
-        this.limpiarFormulario();
-        this.listar();
+        try {
+            const respuesta = await fetch(urlFinal, configuracion);
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok) {
+                if (resultado.errores) {
+                    const mensajes = resultado.errores.map(e => `- ${e.msg}`).join('\n');
+                    alert("No se pudo registrar la reserva:\n" + mensajes);
+                } else {
+                    alert("Error: " + (resultado.error || "No se pudo procesar la reserva"));
+                }
+                return;
+            }
+
+            alert("¡Reserva registrada con éxito!");
+            this.limpiarFormulario();
+            this.listar();
+
+        } catch (error) {
+            console.error("Error de red:", error);
+            alert("Error crítico: El servidor no responde.");
+        }
     },
 
     prepararEdicion(reserva) {
@@ -217,7 +253,7 @@ const gestionReservas = {
         document.getElementById('reserva-correo').value = reserva.email;
         document.getElementById('reserva-actividad').value = reserva.actividad_id;
         document.getElementById('reserva-mensaje').value = reserva.mensaje;
-        
+
         this.formulario.dataset.idEdicion = reserva.id;
         this.formulario.querySelector('button').textContent = "ACTUALIZAR RESERVA";
         this.formulario.scrollIntoView({ behavior: 'smooth', block: 'center' });
